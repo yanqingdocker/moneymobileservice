@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.caogen.mapper.OperaMapper" >
+
+    <resultMap id="BaseResultMap" type="cn.com.caogen.entity.Operation" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="snumber" property="snumber" jdbcType="VARCHAR" />
+        <result column="countid" property="countid" jdbcType="VARCHAR" />
+        <result column="counttype" property="countType" jdbcType="VARCHAR" />
+        <result column="num" property="num" jdbcType="DOUBLE" />
+        <result column="operatype" property="operaType" jdbcType="VARCHAR" />
+        <result column="operatime" property="operaTime" jdbcType="VARCHAR" />
+        <result column="operauser" property="operaUser" jdbcType="VARCHAR" />
+        <result column="oi" property="oi" jdbcType="INTEGER" />
+        <result column="operaip" property="operaIp" jdbcType="VARCHAR" />
+        <result column="servicebranch" property="servicebranch" jdbcType="VARCHAR" />
+
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+    id,snumber,countid,counttype,num,operatype,operatime,operauser,oi,operaip,servicebranch
+     </sql>
+    <insert id="add" parameterType="cn.com.caogen.entity.Appliy">
+        insert into operalog (snumber,countid,counttype,num,operatype,operatime,operauser,oi,operaip) values
+        (#{snumber,jdbcType=VARCHAR},#{countid,jdbcType=VARCHAR},#{countType,jdbcType=VARCHAR},#{num,jdbcType=DOUBLE},#{operaType,jdbcType=VARCHAR},#{operaTime,jdbcType=VARCHAR},#{operaUser,jdbcType=VARCHAR},#{oi,jdbcType=INTEGER},#{operaIp,jdbcType=VARCHAR});
+    </insert>
+
+    <select id="queryAll"  resultMap="BaseResultMap" >
+        select <include refid="Base_Column_List"/> from operalog
+
+    </select>
+
+    <select id="queryById"  resultMap="BaseResultMap" parameterType="String">
+        select <include refid="Base_Column_List"/> from operalog where snumber=#{snumber}
+
+    </select>
+
+    <select id="queryCondition"  resultMap="BaseResultMap" parameterType="map">
+        select <include refid="Base_Column_List"/> from operalog where true
+        <if test="countid != null">
+            and countid =#{countid}
+        </if>
+        <if test="operauser != null">
+            and operauser =#{operauser}
+        </if>
+        <if test="operatype != null">
+            and operatype =#{operatype}
+        </if>
+        <if test="counttype != null">
+            and counttype =#{counttype}
+        </if>
+        <if test="oi != null">
+            and oi =#{oi}
+        </if>
+    </select>
+
+
+
+
+
+</mapper>

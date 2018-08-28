@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.caogen.mapper.BankCardMapper" >
+
+    <resultMap id="BaseResultMap" type="cn.com.caogen.entity.BankCard" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="bankcard" property="bankCard" jdbcType="VARCHAR" />
+        <result column="banktype" property="bankType" jdbcType="VARCHAR" />
+        <result column="idcard" property="idCard" jdbcType="VARCHAR" />
+        <result column="username" property="username" jdbcType="INTEGER" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="cardaddress" property="cardAddress" jdbcType="VARCHAR" />
+        <result column="userid" property="userId" jdbcType="INTEGER" />
+        <result column="createtime" property="createTime" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+     id, bankcard, banktype, idcard, username,phone,cardaddress,userid,createtime
+     </sql>
+    <insert id="add" parameterType="cn.com.caogen.entity.BankCard">
+        insert into bankcard (bankcard, banktype, idcard, username,phone,cardaddress,userid,createtime) values
+        (#{bankCard,jdbcType=VARCHAR},#{bankType,jdbcType=VARCHAR},#{idCard,jdbcType=VARCHAR},#{username,jdbcType=VARCHAR},
+        #{phone,jdbcType=VARCHAR}, #{cardAddress,jdbcType=VARCHAR},#{userId,jdbcType=INTEGER},#{createTime,jdbcType=VARCHAR});
+    </insert>
+
+    <delete id="delete" parameterType="int">
+        delete from bankcard where id=#{id,jdbcType=INTEGER }
+    </delete>
+
+
+    <select id="queryCondition"  resultMap="BaseResultMap" parameterType="Map">
+        select <include refid="Base_Column_List"/> from bankcard
+        where 1=1
+        <if test="userid !=null">
+            and userid=#{userid}
+        </if>
+        <if test="id !=null">
+            and id=#{id}
+        </if>
+        <if test="bankcard !=null">
+            and bankcard=#{bankcard}
+        </if>
+    </select>
+
+
+</mapper>

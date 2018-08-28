@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.caogen.mapper.BorrowMapper" >
+
+    <resultMap id="BaseResultMap" type="cn.com.caogen.entity.Borrow" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="snumber" property="snumber" jdbcType="VARCHAR" />
+        <result column="num" property="num" jdbcType="DOUBLE" />
+        <result column="moneytype" property="moneytype" jdbcType="VARCHAR" />
+        <result column="warrantor" property="warrantor" jdbcType="VARCHAR" />
+        <result column="borrowerphone" property="borrowerphone" jdbcType="VARCHAR" />
+        <result column="borrower" property="borrower" jdbcType="VARCHAR" />
+        <result column="createtime" property="createtime" jdbcType="VARCHAR" />
+        <result column="term" property="term" jdbcType="INTEGER" />
+        <result column="servicebranch" property="servicebranch" jdbcType="VARCHAR" />
+        <result column="operauser" property="operauser" jdbcType="VARCHAR" />
+        <result column="status" property="status" jdbcType="INTEGER" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+    id,snumber,num,moneytype,warrantor,borrowerphone,borrower,createtime,term,status,servicebranch,operauser
+     </sql>
+    <insert id="add" parameterType="cn.com.caogen.entity.Borrow">
+        insert into borrow (snumber,num,moneytype,warrantor,borrowerphone,borrower,createtime,term,servicebranch,operauser) values (#{snumber,jdbcType=VARCHAR},#{num,jdbcType=DOUBLE},#{moneytype,jdbcType=VARCHAR},#{warrantor,jdbcType=VARCHAR},#{borrowerphone,jdbcType=VARCHAR},#{borrower,jdbcType=VARCHAR},#{createtime,jdbcType=VARCHAR},#{term,jdbcType=INTEGER},#{servicebranch,jdbcType=VARCHAR},#{operauser,jdbcType=VARCHAR});
+    </insert>
+    <select id="queryAll" resultMap="BaseResultMap" parameterType="map">
+        select <include refid="Base_Column_List"/> from borrow where true
+        <if test="status != null">
+           and status=#{status}
+        </if>
+        <if test="id != null">
+            and id=#{id}
+        </if>
+        <if test="borrowerphone != null">
+            and borrowerphone=#{borrowerphone}
+        </if>
+
+    </select>
+    <update id="update" parameterType="int">
+        update borrow set status=1 where id=#{id}
+    </update>
+<!--    <update id="update" parameterType="map">
+        update task set state=#{state},endtime=#{endtime} where id=#{id}
+    </update>
+    <select id="queryByState" resultMap="BaseResultMap" parameterType="String">
+        select <include refid="Base_Column_List"/> from task where state=#{state}
+    </select>
+    <select id="queryAll" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/> from task
+    </select>-->
+
+
+</mapper>

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.caogen.mapper.UserMapper" >
+
+    <resultMap id="BaseResultMap" type="cn.com.caogen.entity.User" >
+        <id column="id" property="userid" jdbcType="INTEGER" />
+        <result column="username" property="username" jdbcType="VARCHAR" />
+        <result column="password" property="password" jdbcType="VARCHAR" />
+        <result column="phone" property="phone" jdbcType="VARCHAR" />
+        <result column="idcard" property="idcard" jdbcType="VARCHAR" />
+        <result column="email" property="email" jdbcType="VARCHAR" />
+        <result column="birthday" property="birthday" jdbcType="VARCHAR" />
+        <result column="address" property="address" jdbcType="VARCHAR" />
+        <result column="createtime" property="createtime" jdbcType="VARCHAR" />
+        <result column="lasttime" property="lasttime" jdbcType="VARCHAR" />
+        <result column="isauthentication" property="isauthentication" jdbcType="INTEGER" />
+        <result column="leavel" property="leavel" jdbcType="INTEGER" />
+        <result column="img" property="img" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+     id, username, password, phone,email,idcard,birthday,address,createtime,lasttime,isauthentication,leavel,img
+    </sql>
+    <insert id="add" parameterType="cn.com.caogen.entity.User">
+        insert into user (password,phone,createtime) values (#{password,jdbcType=VARCHAR},#{phone,jdbcType=VARCHAR},#{createtime,jdbcType=VARCHAR});
+    </insert>
+
+    <delete id="delete" parameterType="int">
+        delete from user where id=#{userid,jdbcType=INTEGER }
+    </delete>
+
+    <select id="queryAll"  resultMap="BaseResultMap" parameterType="Map">
+        select <include refid="Base_Column_List"/> from user where 1=1
+        <if test="userid != null">
+            and id = #{userid},
+        </if>
+        <if test="phone != null">
+            and phone =#{phone}
+        </if>
+    </select>
+
+    <select id="querybyId"  resultMap="BaseResultMap" parameterType="int">
+        select <include refid="Base_Column_List"/> from user where id=#{id}
+
+    </select>
+
+    <update id="update" parameterType="cn.com.caogen.entity.User">
+        update user set
+        <if test="phone != null">
+            phone=#{phone},
+        </if>
+        <if test="username != null">
+            username=#{username},
+        </if>
+        <if test="password !=null">
+            password=#{password},
+        </if>
+        <if test="email !=null">
+            email=#{email},
+        </if>
+        <if test="idcard !=null">
+            idcard=#{idcard},
+        </if>
+        <if test="birthday !=null">
+            birthday=#{birthday},
+        </if>
+        <if test="address !=null">
+            address=#{address},
+        </if>
+        <if test="createtime !=null">
+            createtime=#{createtime},
+        </if>
+        <if test="lasttime !=null">
+            lasttime=#{lasttime},
+        </if>
+        <if test="isauthentication !=null">
+            isauthentication=#{isauthentication},
+        </if>
+        <if test="img != null">
+            img=#{img}
+        </if>
+        where id=#{userid}
+    </update>
+
+</mapper>

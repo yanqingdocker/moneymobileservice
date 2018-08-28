@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.caogen.mapper.CashPoolMapper" >
+
+    <resultMap id="BaseResultMap" type="cn.com.caogen.entity.CashPool" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="countid" property="countid" jdbcType="VARCHAR" />
+        <result column="counttype" property="counttype" jdbcType="VARCHAR" />
+        <result column="blance" property="blance" jdbcType="DOUBLE" />
+        <result column="lasttime" property="lasttime" jdbcType="VARCHAR" />
+        <result column="servicebranch" property="servicebranch" jdbcType="VARCHAR" />
+
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+     id,countid,counttype,blance,lasttime
+    </sql>
+
+    <select id="queryAll"  resultMap="BaseResultMap" >
+        select <include refid="Base_Column_List"/> from cashpool
+    </select>
+    <insert id="add" parameterType="cn.com.caogen.entity.CashPool">
+        insert into cashpool (countid,counttype,lasttime,servicebranch) values (#{countid,jdbcType=INTEGER},#{counttype,jdbcType=INTEGER},#{lasttime,jdbcType=INTEGER},#{servicebranch,jdbcType=INTEGER})
+    </insert>
+    <update id="update" parameterType="cn.com.caogen.entity.CashPool">
+        update cashpool set blance=#{blance},lasttime=#{lasttime} where id=#{id}
+    </update>
+    <select id="queryByType" resultMap="BaseResultMap" parameterType="map">
+        select <include refid="Base_Column_List"/> from cashpool where
+        <if test="counttype != null">
+            counttype=#{counttype}  and
+        </if>
+        servicebranch=#{servicebranch}
+    </select>
+
+
+</mapper>

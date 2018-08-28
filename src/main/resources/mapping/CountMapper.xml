@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.caogen.mapper.CountMapper" >
+
+    <resultMap id="BaseResultMap" type="cn.com.caogen.entity.Count" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="cardid" property="cardId" jdbcType="VARCHAR" />
+        <result column="counttype" property="countType" jdbcType="VARCHAR" />
+        <result column="state" property="state" jdbcType="INTEGER" />
+        <result column="userid" property="userId" jdbcType="VARCHAR" />
+        <result column="blance" property="blance" jdbcType="DOUBLE" />
+        <result column="paypwd" property="payPwd" jdbcType="VARCHAR" />
+        <result column="createtime" property="createTime" jdbcType="VARCHAR" />
+        <result column="checkcode" property="checkCode" jdbcType="VARCHAR" />
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+     id, cardid, counttype, state,userid,blance,paypwd,createtime,checkcode
+     </sql>
+    <insert id="add" parameterType="cn.com.caogen.entity.Count">
+        insert into count (cardid,counttype,userid,paypwd,createtime,checkcode) values (#{cardId,jdbcType=INTEGER},#{countType,jdbcType=VARCHAR},#{userId,jdbcType=INTEGER},#{payPwd,jdbcType=VARCHAR},#{createTime,jdbcType=VARCHAR},#{checkCode,jdbcType=INTEGER});
+    </insert>
+
+    <delete id="delete" parameterType="int">
+        delete from count where id=#{id,jdbcType=INTEGER }
+    </delete>
+
+    <select id="queryAll"  resultMap="BaseResultMap" parameterType="Map">
+        select <include refid="Base_Column_List"/> from count
+    </select>
+
+    <select id="queryByUserId"  resultMap="BaseResultMap" parameterType="int">
+        select <include refid="Base_Column_List"/> from count
+        where userid=#{userid}
+    </select>
+
+    <update id="update" parameterType="cn.com.caogen.entity.Count">
+        update count set
+        <if test="blance != null">
+            blance=#{blance,jdbcType=DOUBLE},
+        </if>
+        <if test="checkCode != null">
+            checkcode=#{checkCode},
+        </if>
+        <if test="state != null">
+            state=#{state},
+        </if>
+        <if test="payPwd != null">
+            paypwd=#{payPwd}
+        </if>
+        where id=#{id}
+    </update>
+    <select id="queryById" parameterType="int" resultMap="BaseResultMap">
+        select <include refid="Base_Column_List"/> from count where id=#{id}
+    </select>
+
+</mapper>

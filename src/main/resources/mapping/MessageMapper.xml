@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="cn.com.caogen.mapper.MessageMapper" >
+
+  <resultMap id="BaseResultMap" type="cn.com.caogen.entity.Message" >
+        <id column="id" property="id" jdbcType="INTEGER" />
+        <result column="title" property="title" jdbcType="VARCHAR" />
+        <result column="content" property="content" jdbcType="VARCHAR" />
+        <result column="createtime" property="createTime" jdbcType="VARCHAR" />
+        <result column="username" property="username" jdbcType="INTEGER" />
+        <result column="messagetype" property="messagetype" jdbcType="VARCHAR" />
+        <result column="visiable" property="visiable" jdbcType="INTEGER" />
+        <result column="userid" property="userid" jdbcType="INTEGER" />
+
+    </resultMap>
+
+    <sql id="Base_Column_List" >
+     id, title, content, createtime, username,visiable,messagetype,userid
+     </sql>
+   <insert id="addMessage" parameterType="cn.com.caogen.entity.Message">
+        insert into message (title, content, createtime, username,messagetype,userid) values
+        (#{title,jdbcType=VARCHAR},#{content,jdbcType=VARCHAR},#{createTime,jdbcType=VARCHAR},#{username,jdbcType=VARCHAR},
+        #{messagetype,jdbcType=VARCHAR},#{userid,jdbcType=VARCHAR});
+    </insert>
+
+    <update id="updateMessage" parameterType="Map">
+        update message set visiable=#{visiable}
+        where id=#{id,jdbcType=INTEGER }
+    </update>
+
+    <select id="queryAll"  resultMap="BaseResultMap" parameterType="Map">
+        select <include refid="Base_Column_List"/> from message where true
+        <if test="id !=null">
+            and id=#{id}
+        </if>
+        <if test="userid !=null">
+            and userid=#{userid}
+        </if>
+        <if test="messagetype !=null">
+            and messagetype=#{messagetype}
+        </if>
+        <if test="visiable !=null">
+            and visiable=#{visiable}
+        </if>
+    </select>
+    <delete id="delete" parameterType="int">
+        delete from message where id=#{id}
+    </delete>
+
+    <delete id="batchdelete" parameterType="int[]">
+        delete from message where id in
+        <foreach collection="array" item="arr" index="no" open="("
+                 separator="," close=")">
+            #{arr}
+        </foreach>
+    </delete>
+
+
+
+</mapper>
