@@ -62,6 +62,10 @@ public class CountController {
 
         logger.info("createCount start :countType=" + countType);
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         if (StringUtil.checkStrs(countType)) {
             if (checkUser(request.getSession().getAttribute("phone").toString())) {
                 payPwd = MD5Util.string2MD5(payPwd);
@@ -148,6 +152,10 @@ public class CountController {
 
         logger.info("queryCountByUserid start ");
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         String userId = null;
         if(request.getSession().getAttribute("userid")!=null){
             userId=String.valueOf(user.getUserid());
@@ -189,6 +197,10 @@ public class CountController {
     public String countSwitch(HttpServletRequest request,@RequestParam("countid") String id, @RequestParam("moneynum") Double moneynum, @RequestParam("receivecount") String receivecount, @RequestParam("payPwd") String payPwd) {
         logger.info("countSwitch start: countid="+id+",moneynum="+moneynum+",receivecount="+receivecount+",payPaw="+payPwd);
         User currentuser=JedisUtil.getUser(request);
+        if(currentuser==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         if (!StringUtil.checkStrs(id, String.valueOf(moneynum), receivecount)) {
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL, ConstantUtil.ERROR_ARGS)).toString();
         }
@@ -239,6 +251,10 @@ public class CountController {
     public String exchange(@RequestParam("datas") String datas,HttpServletRequest request) {
         logger.info("exchange start: datas="+datas);
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         if (!StringUtil.checkStrs(datas)) {
             return net.sf.json.JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL, ConstantUtil.ERROR_ARGS)).toString();
         }
@@ -318,7 +334,7 @@ public class CountController {
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL)).toString();
         }
     }
-    @RequestMapping(path = "/getOutCash",method = RequestMethod.POST)
+    @RequestMapping(path = "/getOutCash",method = RequestMethod.GET)
     public String getOutCash(HttpServletRequest request,@RequestParam("paypwd") String paypwd,@RequestParam("countid") String countid,@RequestParam("cardnum") String cardnum,@RequestParam("banktype") String banktype,@RequestParam("num") Double num,@RequestParam("username") String username){
         if(!StringUtil.checkStrs(paypwd,countid,cardnum,banktype,String.valueOf(num),username)){
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
@@ -365,7 +381,7 @@ public class CountController {
     }
 
 
-    @RequestMapping(path="/scanPay",method = RequestMethod.POST)
+    @RequestMapping(path="/scanPay",method = RequestMethod.GET)
     public String scanPay(@RequestParam("telphone") String telphone,@RequestParam("type") String type,@RequestParam("num") Double num,@RequestParam("payPwd") String payPwd, HttpServletRequest request){
         logger.info("scanPay start:");
         if (!StringUtil.checkStrs(telphone,type,String.valueOf(num),payPwd)) {
@@ -386,6 +402,10 @@ public class CountController {
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
         }
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         user.setType(type);
         user.setNum(num);
 

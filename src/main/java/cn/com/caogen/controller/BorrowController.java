@@ -53,6 +53,10 @@ public class BorrowController {
     public String queryAll(HttpServletRequest request){
         logger.info("queryAllborrower start:");
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         Map<String,Object> parmMap=new HashMap<String,Object>();
         parmMap.put("borrowerphone",user.getPhone());
         List<Borrow> borrowList=borrowService.queryAll(parmMap);

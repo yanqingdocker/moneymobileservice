@@ -151,7 +151,7 @@ public class CountServiceImpl implements ICountService {
 
     public List<Count> queryByUserId(int userid) {
         try {
-                List<Count> countList=countMapper.queryByUserId(userid);
+            List<Count> countList=countMapper.queryByUserId(userid);
 //                for (Count count:countList){
 //                    String checkCode=DataMonitor.getValiateCode(count,"id","checkCode","exception","state");
 //                    if(!checkCode.equals(count.getCheckCode())){
@@ -159,7 +159,7 @@ public class CountServiceImpl implements ICountService {
 //                        updateCount(String.valueOf(count.getId()),0,ConstantUtil.COUNT_EXCEPTION,null);
 //                    }
 //                }
-                return countList;
+            return countList;
         } catch (Exception e) {
             logger.error("queryByUserId fail" + e.getMessage());
         }
@@ -170,7 +170,7 @@ public class CountServiceImpl implements ICountService {
     public Count queryById(String id) {
         Count count=null;
         try {
-             count=countMapper.queryById(Integer.parseInt(id));
+            count=countMapper.queryById(Integer.parseInt(id));
         }catch (NumberFormatException e){
             return null;
         }
@@ -210,9 +210,8 @@ public class CountServiceImpl implements ICountService {
             checkCode=DataMonitor.getValiateCode(destCount,"id","checkCode","exception","state");
             destCount.setCheckCode(checkCode);
             countMapper.update(destCount);
-            String snumber=SerialnumberUtil.Getnum();
-            saveOperaLog(srcCount.getCardId(),srcCount.getCountType(),-moneynum,ConstantUtil.SERVICETYPE_SWITCH,operauser,ConstantUtil.MONEY_OUT,operaip,SerialnumberUtil.Getnum());
-            saveOperaLog(destCount.getCardId(),destCount.getCountType(),moneynum,ConstantUtil.SERVICETYPE_SWITCH,operauser,ConstantUtil.MONEY_IN,operaip,snumber);
+            String snumber=saveOperaLog(srcCount.getCardId(),srcCount.getCountType(),-moneynum,ConstantUtil.SERVICETYPE_SWITCH,operauser,ConstantUtil.MONEY_OUT,operaip);
+            saveOperaLog(destCount.getCardId(),destCount.getCountType(),moneynum,ConstantUtil.SERVICETYPE_SWITCH,operauser,ConstantUtil.MONEY_IN,operaip);
             return snumber;
         }catch (Exception e){
             //有一个不成功能则回滚事务
@@ -281,8 +280,8 @@ public class CountServiceImpl implements ICountService {
             destCount.setCheckCode(checkCode);
             countMapper.update(destCount);
             String snumber=SerialnumberUtil.Getnum();
-            saveOperaLog(srcCount.getCardId(),srcCount.getCountType(),-srcmoney,ConstantUtil.SERVICETYPE_EXCHANGE,operauser,ConstantUtil.MONEY_OUT,operaip,snumber);
-            saveOperaLog(destCount.getCardId(),destCount.getCountType(),destmoney,ConstantUtil.SERVICETYPE_EXCHANGE,operauser,ConstantUtil.MONEY_IN,operaip,snumber);
+            saveexchangeOperaLog(srcCount.getCardId(),srcCount.getCountType(),-srcmoney,ConstantUtil.SERVICETYPE_EXCHANGE,operauser,ConstantUtil.MONEY_OUT,operaip,snumber);
+            saveexchangeOperaLog(destCount.getCardId(),destCount.getCountType(),destmoney,ConstantUtil.SERVICETYPE_EXCHANGE,operauser,ConstantUtil.MONEY_IN,operaip,snumber);
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.SUCCESS,snumber)).toString();
         }catch (Exception e){
             //有一个不成功能则回滚事务
@@ -329,9 +328,8 @@ public class CountServiceImpl implements ICountService {
         try {
             updateCount(String.valueOf(srcCount.getId()),srcCount.getBlance()-num,null,null);
             updateCount(String.valueOf(destCount.getId()),destCount.getBlance()+num,null,null);
-
-            saveOperaLog(srcCount.getCardId(),srcCount.getCountType(),-num,ConstantUtil.SERVICETYPE_SWITCH,srcUser.getUsername(),ConstantUtil.MONEY_OUT,ip,SerialnumberUtil.Getnum());
-            saveOperaLog(destCount.getCardId(),destCount.getCountType(),num,ConstantUtil.SERVICETYPE_EXCHANGE,srcUser.getUsername(),ConstantUtil.MONEY_IN,ip,SerialnumberUtil.Getnum());
+            saveexchangeOperaLog(srcCount.getCardId(),srcCount.getCountType(),-num,ConstantUtil.SERVICETYPE_SWITCH,srcUser.getUsername(),ConstantUtil.MONEY_OUT,ip,SerialnumberUtil.Getnum());
+            saveexchangeOperaLog(destCount.getCardId(),destCount.getCountType(),num,ConstantUtil.SERVICETYPE_EXCHANGE,srcUser.getUsername(),ConstantUtil.MONEY_IN,ip,SerialnumberUtil.Getnum());
         }catch (Exception e){
             e.printStackTrace();
             //有一个不成功能则回滚事务
@@ -342,19 +340,33 @@ public class CountServiceImpl implements ICountService {
     }
 
 
-    public String saveOperaLog(String countid,String counttype,Double num,String operatype,String operauser,int oi,String operaip,String snumber){
-            Operation operation=new Operation();
-            operation.setSnumber(snumber);
-            operation.setCountid(countid);
-            operation.setCountType(counttype);
-            operation.setNum(num);
-            operation.setOperaType(operatype);
-            operation.setOperaTime(DateUtil.getTime());
-            operation.setOperaUser(operauser);
-            operation.setOi(oi);
-            operation.setOperaIp(operaip);
-            operaMapper.add(operation);
-            return operation.getSnumber();
+    public String saveOperaLog(String countid,String counttype,Double num,String operatype,String operauser,int oi,String operaip){
+        Operation operation=new Operation();
+        operation.setSnumber(SerialnumberUtil.Getnum());
+        operation.setCountid(countid);
+        operation.setCountType(counttype);
+        operation.setNum(num);
+        operation.setOperaType(operatype);
+        operation.setOperaTime(DateUtil.getTime());
+        operation.setOperaUser(operauser);
+        operation.setOi(oi);
+        operation.setOperaIp(operaip);
+        operaMapper.add(operation);
+        return operation.getSnumber();
+    }
+    public String saveexchangeOperaLog(String countid,String counttype,Double num,String operatype,String operauser,int oi,String operaip,String snumber){
+        Operation operation=new Operation();
+        operation.setSnumber(snumber);
+        operation.setCountid(countid);
+        operation.setCountType(counttype);
+        operation.setNum(num);
+        operation.setOperaType(operatype);
+        operation.setOperaTime(DateUtil.getTime());
+        operation.setOperaUser(operauser);
+        operation.setOi(oi);
+        operation.setOperaIp(operaip);
+        operaMapper.add(operation);
+        return operation.getSnumber();
     }
 
 

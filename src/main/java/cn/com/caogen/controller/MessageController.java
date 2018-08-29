@@ -49,6 +49,10 @@ public class MessageController {
     public String sendMessage(@RequestParam("receivecount") String receivecount,@RequestParam("title") String title, @RequestParam("content") String content, HttpServletRequest request) {
             logger.info("sendMessage start: receivecount="+receivecount+",titlt="+title+",content="+content);
             User currentUser=JedisUtil.getUser(request);
+        if(currentUser==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
             if (StringUtil.checkStrs(title, content)) {
                 User user=getUser(receivecount,null);
                 if(user==null||user.getIsauthentication()==0){
@@ -82,6 +86,10 @@ public class MessageController {
     public String querysend(HttpServletRequest request) {
         logger.info("querysend start: request="+request);
         User currentUser=JedisUtil.getUser(request);
+        if(currentUser==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         Map<String,Object> parmMap=new HashMap<String,Object>();
         parmMap.put("userid",currentUser.getUserid());
         parmMap.put("messagetype",1);
@@ -99,6 +107,10 @@ public class MessageController {
     public String reciveMessage(HttpServletRequest request) {
         logger.info("reciveMessage start");
         User currentUser=JedisUtil.getUser(request);
+        if(currentUser==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         if(currentUser==null){
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
         }

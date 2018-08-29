@@ -46,6 +46,10 @@ public class AppliyController {
     @RequestMapping(path = "scanlogin",method = RequestMethod.GET)
     public String scanLogin(HttpServletRequest request){
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         int userid=user.getUserid();
 
         extappliyService.init();
@@ -72,6 +76,9 @@ public class AppliyController {
 
         }
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         int userid=user.getUserid();
         String allowbase64= extappliyService.scanAllow(String.valueOf(userid));
         if(stringRedisTemplate.opsForValue().get(userid+"_allowbase64")!=null&&"".equals(allowbase64)){
@@ -86,6 +93,10 @@ public class AppliyController {
     @RequestMapping(path = "bind",method = RequestMethod.GET)
     public String bindAppliy(HttpServletRequest request){
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         int userid=user.getUserid();
         try {
             try {
@@ -130,7 +141,12 @@ public class AppliyController {
      * @return
      */
     @RequestMapping(path = "unbindAppliy",method = RequestMethod.POST)
-    public String unbindAppliy(@RequestParam("id") String id){
+    public String unbindAppliy(@RequestParam("id") String id,HttpServletRequest request){
+        User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         appliyService.unbind(Integer.parseInt(id));
         return JSONObject.fromObject(new ResponseMessage(ConstantUtil.SUCCESS)).toString();
     }
@@ -144,6 +160,10 @@ public class AppliyController {
     @RequestMapping(path = "querybyUserid",method = RequestMethod.GET)
     public String querybyUserid(HttpServletRequest request){
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         Map<String,Object> parmMap=new HashMap<String,Object>();
         parmMap.put("userid",user.getUserid());
         List<Appliy> appliyList=appliyService.query(parmMap);

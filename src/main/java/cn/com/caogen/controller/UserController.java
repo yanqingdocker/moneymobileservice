@@ -74,6 +74,10 @@ public class UserController {
         }
 
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         user.setPhone(newphone);
         userServiceImpl.update(user);
         Map<String,Object> sessionMap=JedisUtil.getSessionMap();
@@ -95,6 +99,10 @@ public class UserController {
 //            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
 //        }
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         user.setImg(new String(img));
         userServiceImpl.update(user);
         Map<String,Object> sessionMap=JedisUtil.getSessionMap();
@@ -276,6 +284,10 @@ public class UserController {
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_OLDPASSWORD)).toString();
         }
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         user.setPassword(newpassword);
         user.setLasttime(DateUtil.getTime());
         userServiceImpl.update(user);
@@ -335,8 +347,8 @@ public class UserController {
     public String getuser(HttpServletRequest request) {
         User currentUser=JedisUtil.getUser(request);
         if(currentUser==null){
-
-            return null;
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
         }
 
         return JSONObject.fromObject(currentUser).toString();

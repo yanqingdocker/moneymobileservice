@@ -57,6 +57,10 @@ public class OperaController {
     @RequestMapping(path = "/queryByUserid",method = RequestMethod.GET)
     public String queryByUserid(HttpServletRequest request){
         User currentUser=JedisUtil.getUser(request);
+        if(currentUser==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
        List<Count> countList=countServiceimpl.queryByUserId(currentUser.getUserid());
        List<Operation> operationList=new ArrayList<Operation>();
        for(Count count:countList){

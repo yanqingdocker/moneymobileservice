@@ -62,9 +62,13 @@ public class BankController {
      * @param datas
      * @return
      */
-    @RequestMapping(path = "/bindBankCard", method = RequestMethod.POST)
+    @RequestMapping(path = "/bindBankCard", method = RequestMethod.GET)
     public String bindBankCard(@RequestParam("datas") String datas, HttpServletRequest request) {
         User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return null;
+        }
         logger.info("bindBankCard start: datas="+datas);
         if (StringUtil.checkStrs(datas)) {
             JSONObject jsonObject = JSONObject.fromObject(datas);
@@ -110,18 +114,23 @@ public class BankController {
     /**
      * 解绑银行卡
      */
-    @RequestMapping(path = "/unbind", method = RequestMethod.POST)
+    @RequestMapping(path = "/unbind", method = RequestMethod.GET)
     public String unbind(@RequestParam("id") String id) {
         logger.info("unbind start: id="+id);
         if (StringUtil.checkStrs(id)) {
             Map<String,Object> parmMap=new HashMap<String,Object>();
-            parmMap.put("id",Integer.parseInt(id));
-            List<BankCard> list=bankCardService.queryCondition(parmMap);
-            if(list==null){
-                return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_BACKID)) .toString();
+            try {
+                parmMap.put("id",Integer.parseInt(id));
+                List<BankCard> list=bankCardService.queryCondition(parmMap);
+                if(list==null){
+                    return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_BACKID)) .toString();
+                }
+                bankCardService.delete(Integer.parseInt(id));
+                return JSONObject.fromObject(new ResponseMessage(ConstantUtil.SUCCESS, "解绑成功")).toString();
+            }catch (NumberFormatException e){
+                return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
             }
-            bankCardService.delete(Integer.parseInt(id));
-            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.SUCCESS, "解绑成功")).toString();
+
         }else {
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
         }
@@ -131,7 +140,7 @@ public class BankController {
     /**
      * 查询当前用户下的银行卡
      */
-    @RequestMapping(path = "/query", method = RequestMethod.POST)
+    @RequestMapping(path = "/query", method = RequestMethod.GET)
     public String query(HttpServletRequest request) {
         logger.info("query start");
         User user=JedisUtil.getUser(request);

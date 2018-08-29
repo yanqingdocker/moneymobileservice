@@ -47,6 +47,10 @@ public class MobileController {
     public String payMent(HttpServletRequest request, @RequestParam("countId") String countId, @RequestParam("cardNum") String cardNum, @RequestParam("phone") String phone) {
         logger.info("payMent start: countId="+countId+",cardNum="+cardNum+",phone="+phone);
         User currentUser=JedisUtil.getUser(request);
+        if(currentUser==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
         if (!StringUtil.checkStrs(countId,cardNum,phone)) {
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
         }
@@ -68,7 +72,7 @@ public class MobileController {
                     //充值提交成功,更新账户余额
                     count.setBlance(count.getBlance()-num);
                     countServiceImpl.updateCount(String.valueOf(count.getId()),count.getBlance(),null,null);
-                    countServiceImpl.saveOperaLog(count.getCardId(),count.getCountType(),num,ConstantUtil.SERVICETYPE_PHONERECHARGE,currentUser.getUsername(),ConstantUtil.MONEY_OUT,IpUtil.getIpAddr(request),SerialnumberUtil.Getnum());
+                    countServiceImpl.saveOperaLog(count.getCardId(),count.getCountType(),num,ConstantUtil.SERVICETYPE_PHONERECHARGE,currentUser.getUsername(),ConstantUtil.MONEY_OUT,IpUtil.getIpAddr(request));
                 } else {
                     return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL)).toString();
                 }
