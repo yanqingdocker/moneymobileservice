@@ -154,10 +154,13 @@
 			<artifactId>javase</artifactId>
 			<version>3.3.3</version>
 		</dependency>
-
-
-
-
+		<dependency>
+			<groupId>PushJavaSDK</groupId>
+			<artifactId>pushsdk</artifactId>
+			<version>1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/src/main/resources/lib/PushJavaSDK-1.0.jar</systemPath>
+		</dependency>
 
 
 
@@ -168,6 +171,9 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration>
+					<includeSystemScope>true</includeSystemScope>
+				</configuration>
 			</plugin>
 
         </plugins>

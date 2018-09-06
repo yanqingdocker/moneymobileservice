@@ -193,7 +193,7 @@ public class CountServiceImpl implements ICountService {
      * @param moneynum
      */
     @Transactional
-    public String countswitch(Count srcCount, Count destCount,Double moneynum,String operaip,String operauser) {
+    public String countswitch(Count srcCount, Count destCount,Double moneynum,String operaip,String operauser,User user,User receivecount) {
 
         DefaultTransactionDefinition def=new DefaultTransactionDefinition();
         def.setName("countswitch");
@@ -212,6 +212,21 @@ public class CountServiceImpl implements ICountService {
             countMapper.update(destCount);
             String snumber=saveOperaLog(srcCount.getCardId(),srcCount.getCountType(),-moneynum,ConstantUtil.SERVICETYPE_SWITCH,operauser,ConstantUtil.MONEY_OUT,operaip);
             saveOperaLog(destCount.getCardId(),destCount.getCountType(),moneynum,ConstantUtil.SERVICETYPE_SWITCH,operauser,ConstantUtil.MONEY_IN,operaip);
+            String title="转账";
+            String content1="";
+            String content2="";
+            if(srcCount.getCountType().equals("USD")){
+                content1="通知:"+user.getUsername()+"向您的美金账户转账$"+moneynum+"美金";
+                content2="交易提醒:您有一笔金额为$"+moneynum+"美金的支出.查看详情";
+            }else{
+                content1="通知:"+user.getUsername()+"向您的人民币账户转账￥"+moneynum+"元";
+                content2="交易提醒:您有一笔金额为￥"+moneynum+"元的支出.查看详情";
+            }
+            logger.info("receivecountname="+receivecount.getUsername()+"receivecountid="+receivecount.getUserid());
+
+            SystemService.send(title,content1,String.valueOf(receivecount.getUserid()));//发送消息给收款方
+            logger.info("username="+user.getUsername()+"user="+user.getUserid());
+            SystemService.send(title,content2,String.valueOf(user.getUserid()));//发送消息给支出方
             return snumber;
         }catch (Exception e){
             //有一个不成功能则回滚事务
@@ -248,7 +263,7 @@ public class CountServiceImpl implements ICountService {
      * @return
      */
     @Transactional
-    public String exchange(String srccountid, String destcountid, Double srcmoney, Double destmoney,String paypwd,String operaip,String operauser) {
+    public String exchange(String srccountid, String destcountid, Double srcmoney, Double destmoney,String paypwd,String operaip,String operauser,String phone) {
         //校验账户是否存在
         Count srcCount=countMapper.queryById(Integer.parseInt(srccountid));
         Count destCount=countMapper.queryById(Integer.parseInt(destcountid));
@@ -282,6 +297,9 @@ public class CountServiceImpl implements ICountService {
             String snumber=SerialnumberUtil.Getnum();
             saveexchangeOperaLog(srcCount.getCardId(),srcCount.getCountType(),-srcmoney,ConstantUtil.SERVICETYPE_EXCHANGE,operauser,ConstantUtil.MONEY_OUT,operaip,snumber);
             saveexchangeOperaLog(destCount.getCardId(),destCount.getCountType(),destmoney,ConstantUtil.SERVICETYPE_EXCHANGE,operauser,ConstantUtil.MONEY_IN,operaip,snumber);
+            String title="SouthPay";
+            String content="您有一笔";
+            SystemService.send(title,content,phone);
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.SUCCESS,snumber)).toString();
         }catch (Exception e){
             //有一个不成功能则回滚事务

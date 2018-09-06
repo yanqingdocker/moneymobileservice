@@ -11,7 +11,6 @@ import java.util.Map;
  */
 public interface IOperaService {
     public void add(Operation operation);
-    public List<Operation> queryAll();
     public List<Operation> queryAll(Map<String, Object> parmMap);
     List<Operation> queryByDate(Map<String,Object> parmMap);
     List<Operation> queryById(String snumber);

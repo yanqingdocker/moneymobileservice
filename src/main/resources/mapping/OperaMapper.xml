@@ -25,10 +25,6 @@
         (#{snumber,jdbcType=VARCHAR},#{countid,jdbcType=VARCHAR},#{countType,jdbcType=VARCHAR},#{num,jdbcType=DOUBLE},#{operaType,jdbcType=VARCHAR},#{operaTime,jdbcType=VARCHAR},#{operaUser,jdbcType=VARCHAR},#{oi,jdbcType=INTEGER},#{operaIp,jdbcType=VARCHAR});
     </insert>
 
-    <select id="queryAll"  resultMap="BaseResultMap" >
-        select <include refid="Base_Column_List"/> from operalog
-
-    </select>
 
     <select id="queryById"  resultMap="BaseResultMap" parameterType="String">
         select <include refid="Base_Column_List"/> from operalog where snumber=#{snumber}
@@ -51,6 +47,12 @@
         </if>
         <if test="oi != null">
             and oi =#{oi}
+        </if>
+        <if test="date != null">
+            and operatime like concat('%',#{date},'%')
+        </if>
+        <if test="type != null">
+            and operatype like concat('%',#{type},'%')
         </if>
     </select>
 

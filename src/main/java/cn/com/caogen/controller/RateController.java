@@ -3,6 +3,8 @@ package cn.com.caogen.controller;
 import cn.com.caogen.entity.User;
 import cn.com.caogen.util.ConstantUtil;
 import cn.com.caogen.util.IpUtil;
+import cn.com.caogen.util.ResponseMessage;
+import cn.com.caogen.util.StringUtil;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
 import org.junit.jupiter.api.Test;
@@ -35,6 +37,7 @@ public class RateController {
      *
      * @return
      */
+
     @RequestMapping(path = "/queryAll", method = RequestMethod.GET)
     public String getRates() {
         logger.info("getRates start");
@@ -62,18 +65,33 @@ public class RateController {
 
     @RequestMapping(path = "/getSingleRate", method = RequestMethod.GET)
     public String getSingleRate(@RequestParam("type") String type){
+        logger.info("getSingleRate start type:"+type);
+        if (!StringUtil.checkStrs(type)) {
+            return   JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
+        }
+        String[] strs=type.split(":");
+        String from=strs[0];
+        String to=strs[1];
+        String type1=from+to;
+        String type2=to+from;
         String rs=stringRedisTemplate.opsForValue().get(ConstantUtil.SENVEN);
+
         StringBuffer sb=new StringBuffer();
         if(rs!=null){
             JSONObject jsonObject=JSONObject.fromObject(rs);
-            String buyPid=jsonObject.getJSONObject(type).getString("buyPic");
-            String sellPic=jsonObject.getJSONObject(type).getString("sellPic");
+            String buyPid="";
+            String sellPic="";
+            if(jsonObject.has(type1)){
+                 buyPid=jsonObject.getJSONObject(type1).getString("buyPic");
 
-            sb.append("{'buyPic':'").append(buyPid).append("','sellPic':'").append(sellPic).append("'}");
+                return   JSONObject.fromObject(new ResponseMessage(ConstantUtil.SUCCESS,buyPid)).toString();
+            }else{
+                 sellPic=jsonObject.getJSONObject(type2).getString("sellPic");
+                return   JSONObject.fromObject(new ResponseMessage(ConstantUtil.SUCCESS,sellPic)).toString();
+            }
+
         }
-
-
-        return   JSONObject.fromObject(sb.toString()).toString();
+        return   JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL)).toString();
     }
 
 

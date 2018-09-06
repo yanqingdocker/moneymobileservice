@@ -1,19 +1,23 @@
 package cn.com.caogen.controller;
 
+import cn.com.caogen.EnumType.CountType;
 import cn.com.caogen.entity.Count;
 import cn.com.caogen.entity.Operation;
 import cn.com.caogen.entity.Task;
 import cn.com.caogen.entity.User;
 import cn.com.caogen.externIsystem.service.MessageService;
+import cn.com.caogen.externIsystem.util.Md5Util;
 import cn.com.caogen.service.*;
 import cn.com.caogen.util.*;
 import net.sf.json.JSON;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONException;
 import net.sf.json.JSONObject;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -35,6 +39,8 @@ import java.util.Map;
 public class CountController {
 
     private static Logger logger = LoggerFactory.getLogger(CountController.class);
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
 
     @Autowired
     private CountServiceImpl countServiceImpl;
@@ -89,17 +95,38 @@ public class CountController {
      * @param payPwd
      * @return
      */
-    @RequestMapping(path = "/updateCountpwd", method = RequestMethod.POST)
-    public String updateCountpwd(@RequestParam("telphone") String telphone,@RequestParam("checknum") String num,@RequestParam("id") String id, @RequestParam("payPwd") String payPwd) {
+    @RequestMapping(path = "/updateCountpwd", method = RequestMethod.GET)
+    public String updateCountpwd(@RequestParam("id") String id, @RequestParam("payPwd") String payPwd) {
         logger.info("startOrstopcount start: id="+id+" payPwd="+payPwd);
+
+        countServiceImpl.queryById(id);
+        if (StringUtil.checkStrs(id, payPwd)) {
+                return countServiceImpl.updateCount(id, 0, null,Md5Util.strToMD5(payPwd));
+        } else {
+            logger.error("startOrstopcount id or state is null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL, ConstantUtil.ERROR_ARGS)).toString();
+        }
+    }
+
+    /**
+     * 修改账户支付密码
+     *
+     * @param id
+     * @param payPwd
+     * @return
+     */
+    @RequestMapping(path = "/authCountpwd", method = RequestMethod.GET)
+    public String authCountpwd(@RequestParam("id") String id, @RequestParam("payPwd") String payPwd) {
+        logger.info("authCountpwd start: id="+id+" payPwd="+payPwd);
 
         payPwd = MD5Util.string2MD5(payPwd);
 
-        if (StringUtil.checkStrs(telphone,num,id, payPwd)) {
-            if(phone.equals(telphone)&&check_Num.equals(num)){
-                return countServiceImpl.updateCount(id, 0, null,payPwd);
+        if (StringUtil.checkStrs(id, payPwd)) {
+            Count count=countServiceImpl.queryById(id);
+            if (count.getPayPwd().equals(payPwd)) {
+                return JSONObject.fromObject(new ResponseMessage(ConstantUtil.SUCCESS)).toString();
             }else{
-                return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL, ConstantUtil.CHECKERROR_NUM)).toString();
+                return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL)).toString();
             }
 
         } else {
@@ -236,7 +263,8 @@ public class CountController {
 
         }
         String operuser="会员-"+currentuser.getUsername();
-        String snumber=countServiceImpl.countswitch(srccount, destCount, moneynum,IpUtil.getIpAddr(request),operuser);
+        String snumber=countServiceImpl.countswitch(srccount, destCount, moneynum,IpUtil.getIpAddr(request),operuser,currentuser,user);
+
         return JSONObject.fromObject(new ResponseMessage(ConstantUtil.SUCCESS,snumber)).toString();
 
     }
@@ -270,7 +298,7 @@ public class CountController {
                 return net.sf.json.JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL, ConstantUtil.ERROR_ARGS)).toString();
             }
             String operuser="会员-"+user.getUsername();
-            return countServiceImpl.exchange(srccountid, destcountid, srcmoney, destmoney, payPwd,IpUtil.getIpAddr(request),operuser);
+            return countServiceImpl.exchange(srccountid, destcountid, srcmoney, destmoney, payPwd,IpUtil.getIpAddr(request),operuser,user.getPhone());
         }catch (JSONException e){
             return net.sf.json.JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL, ConstantUtil.ERROR_ARGS)).toString();
         }
@@ -412,5 +440,82 @@ public class CountController {
         return JSONObject.fromObject(user).toString();
 
     }
+
+
+
+    /**
+     * 获取当前用户
+     * @param request
+     * @return
+     */
+    @RequestMapping(path = "/getPersonCount",method = RequestMethod.GET)
+    public String getuserbyTelphone(HttpServletRequest request) {
+
+      User user=JedisUtil.getUser(request);
+      if(user==null){
+          return "";
+      }
+      List<Count> countList=countServiceImpl.queryByUserId(user.getUserid());
+      if(countList.isEmpty()){
+
+      }
+
+        String rs=stringRedisTemplate.opsForValue().get(ConstantUtil.SENVEN);
+        StringBuffer sb=new StringBuffer();
+        if(rs==null){
+
+        }
+        JSONObject jsonObject=JSONObject.fromObject(rs);
+        String buyPid=jsonObject.getJSONObject("USDCNY").getString("buyPic");
+        String sellPic=jsonObject.getJSONObject("USDCNY").getString("sellPic");
+
+        //定义金额
+        double blance=0.0;
+        for(Count count:countList){
+            switch (user.getDefaultcount()){
+                case "USD":
+                    if(!"USD".equals(count.getCountType())){
+                        //根据汇率转化成USD
+                        double temp=count.getBlance()/Double.parseDouble(buyPid);
+                        blance+=temp;
+                    }else {
+                        blance+=count.getBlance();
+                    }
+                    break;
+                case "CNY":
+                    if(!"CNY".equals(count.getCountType())){
+                        //根据汇率转化成CNY
+                        double temp=count.getBlance()*Double.parseDouble(sellPic);
+                        blance+=temp;
+                    }else {
+                        blance+=count.getBlance();
+                    }
+                    break;
+            }
+
+        }
+        String rsblance=String.format("%.4f",blance);
+
+        if("CNY".equals(user.getDefaultcount())){
+            sb.append("{'num':'￥").append(rsblance).append("','title':'");
+              sb.append(ConstantUtil.TITLE_CNY);
+        }else if("USD".equals(user.getDefaultcount())){
+            sb.append("{'num':'$").append(rsblance).append("','title':'");
+              sb.append(ConstantUtil.TITLE_USD);
+        }
+        sb.append("','outmoney':'").append(String.valueOf(1000));
+        sb.append("','inmoney':'").append(String.valueOf(1000));
+        sb.append("','username':'").append(user.getUsername());
+        sb.append("','time':'").append(user.getLasttime());
+        sb.append("'}");
+        JSONObject jsonObject1=JSONObject.fromObject(sb.toString());
+        JSONArray jsonArray=new JSONArray();
+        User cuuser=new User();
+        cuuser.setImg(user.getImg());
+        jsonArray.add(JSONObject.fromObject(cuuser));
+        jsonArray.add(jsonObject1);
+        return  jsonArray.toString();
+    }
+
 
 }

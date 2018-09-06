@@ -21,10 +21,6 @@ public class OperaServiceImpl implements IOperaService {
             operaMapper.add(operation);
     }
 
-    @Override
-    public List<Operation> queryAll() {
-        return operaMapper.queryAll();
-    }
 
     @Override
     public List<Operation> queryAll(Map<String, Object> parmMap) {

@@ -43,4 +43,6 @@ public class User implements Serializable {
     private String type;
     //交易金额
     private Double num;
+    //默认账户类型
+    private String defaultcount;
 }

@@ -10,6 +10,7 @@ import cn.com.caogen.service.UserServiceImpl;
 import cn.com.caogen.util.*;
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,15 +40,6 @@ public class OperaController {
     private CountServiceImpl countServiceimpl;
 
 
-    /**
-     * 查询所有操作记录
-     * @return
-     */
-    @RequestMapping(path = "/queryAll",method = RequestMethod.GET)
-    public String queryAll(){
-
-        return JSONArray.fromObject(operaServiceimpl.queryAll()).toString();
-    }
 
     /**
      * 查询当前用户下的账户的所有操作纪记录
@@ -62,16 +54,7 @@ public class OperaController {
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
         }
        List<Count> countList=countServiceimpl.queryByUserId(currentUser.getUserid());
-       List<Operation> operationList=new ArrayList<Operation>();
-       for(Count count:countList){
-           Map<String,Object> parmMap=new HashMap<String,Object>();
-           parmMap.put("countid",count.getCardId());
-
-           List<Operation> list=operaServiceimpl.queryAll(parmMap);
-           operationList.addAll(list);
-           parmMap=null;
-       }
-
+       List<Operation> operationList=query(currentUser,null,null);
         return JSONArray.fromObject(operationList).toString();
     }
 
@@ -148,7 +131,69 @@ public class OperaController {
 
     }
 
+    @RequestMapping(path = "/queryByDate",method = RequestMethod.GET)
+    public String queryByDate(@RequestParam("date") String date,HttpServletRequest request){
+        //0
+        logger.info("queryById start: date="+date);
+        if(!StringUtil.checkStrs(date)){
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
+        }
+        User currentUser=JedisUtil.getUser(request);
+        if(currentUser==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
+        List<Operation> operationList=query(currentUser,date,null);
+
+        return JSONArray.fromObject(operationList).toString();
+
+    }
+
+    @RequestMapping(path = "/queryByType",method = RequestMethod.GET)
+    public String queryByType(@RequestParam("type") String type,HttpServletRequest request){
+        //0
+        logger.info("queryById start: date="+type);
+        if(!StringUtil.checkStrs(type)){
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
+        }
+        User currentUser=JedisUtil.getUser(request);
+        if(currentUser==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
+        List<Operation> operationList=null;
+        if("全部".equals(type)){
+            operationList=query(currentUser,null,null);
+        }else{
+            operationList=query(currentUser,null,type);
+        }
+        return JSONArray.fromObject(operationList).toString();
+
+    }
 
 
+    private List<Operation> query(User currentUser,String date,String type){
+        List<Count> countList=countServiceimpl.queryByUserId(currentUser.getUserid());
+        List<Operation> operationList=new ArrayList<Operation>();
+        for(Count count:countList){
+            Map<String,Object> parmMap=new HashMap<String,Object>();
+            parmMap.put("countid",count.getCardId());
+            if(StringUtil.checkStrs(date)){
+                parmMap.put("date",date);
+            }
+            if(StringUtil.checkStrs(type)){
+                parmMap.put("type",type);
+            }
+            List<Operation> list=operaServiceimpl.queryAll(parmMap);
+            operationList.addAll(list);
+        }
+        return operationList;
+    }
+
+    @Test
+    public void test(){
+        String str="2018-08-08";
+        System.out.println(str.substring(0,str.length()-3));
+    }
 
 }

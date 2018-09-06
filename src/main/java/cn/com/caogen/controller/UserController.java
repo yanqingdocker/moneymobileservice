@@ -115,6 +115,29 @@ public class UserController {
 
     }
 
+    @RequestMapping(path = "/updatedefaultcount",method = RequestMethod.GET)
+    public String updatedeFaultCount(@RequestParam("counttype") String counttype,HttpServletRequest request) {
+        logger.info("updatedeFaultCount start:");
+//        if (!StringUtil.checkStrs(new String(img))) {
+//            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
+//        }
+        User user=JedisUtil.getUser(request);
+        if(user==null){
+            logger.info("user=null");
+            return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
+        }
+        user.setDefaultcount(counttype);
+        userServiceImpl.update(user);
+        Map<String,Object> sessionMap=JedisUtil.getSessionMap();
+        if(sessionMap==null){
+            sessionMap=new HashMap<String,Object>();
+        }
+        sessionMap.put(request.getSession().getId(),SerializeUtil.serialize(user));
+        JedisUtil.getJedis().set(ConstantUtil.SESSIONCOLLCTION.getBytes(),SerializeUtil.serialize(sessionMap));
+        return JSONObject.fromObject(new ResponseMessage(ConstantUtil.SUCCESS)).toString();
+
+    }
+
     /**
      * 发送手机验证码
      * @param telphone
@@ -187,7 +210,7 @@ public class UserController {
             if (!StringUtil.checkStrs(telphone,password)){
                 return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.ERROR_ARGS)).toString();
             }
-
+//BB081CE5B827065D13086E343705132B
             password = MD5Util.string2MD5(password);
             User user=getUser(telphone,null);
             if(user==null){
@@ -208,8 +231,6 @@ public class UserController {
                 }
                 sessionMap.put(request.getSession().getId(),SerializeUtil.serialize(user));
                 JedisUtil.getJedis().set(ConstantUtil.SESSIONCOLLCTION.getBytes(),SerializeUtil.serialize(sessionMap));
-
-
                 return JSONObject.fromObject(user).toString();
 
             }else{
@@ -273,7 +294,7 @@ public class UserController {
      * @param newpassword
      * @return
      */
-    @RequestMapping(path="/resetpwdmode",method = RequestMethod.POST)
+    @RequestMapping(path="/resetpwdmode",method = RequestMethod.GET)
     public String resetpwdmode(@RequestParam("oldpassword") String oldpassword,@RequestParam("newpassword") String newpassword,HttpServletRequest request) {
         logger.info("resetpwd start: oldpassword="+oldpassword+",newpassword="+newpassword);
         if (!StringUtil.checkStrs(oldpassword,newpassword)) {
@@ -288,7 +309,7 @@ public class UserController {
             logger.info("user=null");
             return JSONObject.fromObject(new ResponseMessage(ConstantUtil.FAIL,ConstantUtil.NOT_LOGIN)).toString();
         }
-        user.setPassword(newpassword);
+        user.setPassword(MD5Util.string2MD5(newpassword));
         user.setLasttime(DateUtil.getTime());
         userServiceImpl.update(user);
 
@@ -301,7 +322,7 @@ public class UserController {
      * @param password
      * @return
      */
-    @RequestMapping(path="/loginResetpwd",method = RequestMethod.POST)
+    @RequestMapping(path="/loginResetpwd",method = RequestMethod.GET)
     public String loginResetpwd(@RequestParam("telphone") String telphone,@RequestParam("checkNum") String checkNum,@RequestParam("password") String password) {
         logger.info("resetpwd start: telphone="+telphone+",password="+password);
         if (!StringUtil.checkStrs(telphone,password)) {
@@ -372,8 +393,6 @@ public class UserController {
         }
         return  null;
 
-
-
     }
 
 
@@ -382,7 +401,7 @@ public class UserController {
      * @param datas
      * @return
      */
-    @RequestMapping(path="/authentication",method =RequestMethod.POST)
+    @RequestMapping(path="/authentication",method =RequestMethod.GET)
     public String getuser(@RequestParam("datas") String datas,HttpServletRequest request) {
         logger.info("getuser start: datas="+datas);
         if (!StringUtil.checkStrs(datas)) {

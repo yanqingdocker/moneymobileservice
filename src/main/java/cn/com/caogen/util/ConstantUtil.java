@@ -64,5 +64,7 @@ public class ConstantUtil {
     public static final String NOTFOUND_COUNT="此账户id不存在";
     public static final String NOT_LOGIN="请先登录再访问";
     public static final String ALERDY_PHONE="该手机号已经被占用，请更改其他手机号";
+    public static final String TITLE_USD="折合成美金约为";
+    public static final String TITLE_CNY="折合成人民币约为";
 
 }
